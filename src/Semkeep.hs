@@ -1,20 +1,20 @@
 {-# LANGUAGE LambdaCase #-}
 module Semkeep where
 
-newtype Name = Name String
+newtype Var = Var String
   deriving (Eq, Show)
 
-data Exp = Symbol Name
+data Exp = Symbol Var
          | Const Int
-         | LetIn Name Exp Exp
+         | LetIn Var Exp Exp
          | Mul Exp Exp
   deriving (Eq, Show)
 
 formatExp :: Exp -> String
 formatExp = \case
-  Symbol (Name s) -> s
+  Symbol (Var s) -> s
   Const k -> show k
-  LetIn (Name s) e1 e2 -> "(let " ++ s ++ " = " ++ formatExp e1 ++ "\nin " ++ formatExp e2 ++ ")"
+  LetIn (Var s) e1 e2 -> "(let " ++ s ++ " = " ++ formatExp e1 ++ "\nin " ++ formatExp e2 ++ ")"
   Mul e1 e2 -> "(" ++ formatExp e1 ++ " * " ++ formatExp e2 ++ ")"
 
 -- data ExpRel = Assoc

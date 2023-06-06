@@ -7,20 +7,20 @@ import Semkeep
 intLog :: Int -> Int
 intLog = (round :: Double -> Int) . logBase 2 . fromIntegral
 
-pow :: Name -> Int -> Exp
-pow k n =
+pow :: Var -> Int -> Exp
+pow v n =
   assert (2^intLog n == n) $ -- FIXME
   case n of
   0 -> Const 1
-  _ -> let k' = Symbol k
-       in foldr Mul k' (replicate (n - 1) k')
+  _ -> let v' = Symbol v
+       in foldr Mul v' (replicate (n - 1) v')
 
--- pow' :: Name -> Int -> Exp
--- pow' k n =
+-- pow' :: Var -> Int -> Exp
+-- pow' v n =
 --   assert (2^intLog n == n) $ -- FIXME
---   foldr Mul (Const 1) $ map Symbol $ replicate n k
+--   foldr Mul (Const 1) $ map Symbol $ replicate n v
 
-powOpt :: Name -> Int -> Exp -> Exp
+powOpt :: Var -> Int -> Exp -> Exp
 powOpt v n = makeSubsts . group
   where nLog :: Int
         nLog = intLog n
@@ -39,16 +39,16 @@ powOpt v n = makeSubsts . group
         makeSubsts e =
           let (let_ins, res, _, _) = recurse next (id, e, v, 0) nLog
           in let_ins res
-          where next :: (Exp -> Exp, Exp, Name, Int) -> (Exp -> Exp, Exp, Name, Int)
+          where next :: (Exp -> Exp, Exp, Var, Int) -> (Exp -> Exp, Exp, Var, Int)
                 next (f, e_prev, v_prev, i) =
                   let e_new = Mul (Symbol v_prev) (Symbol v_prev)
-                      v_new = Name ("v" ++ show i)
+                      v_new = Var ("v" ++ show i)
                   in (f . LetIn v_new e_new,
                       subst e_new (Symbol v_new) e_prev,
                       v_new, i + 1)
 
-powWithOpt :: Name -> Int -> Exp
-powWithOpt k n = powOpt k n $ pow k n
+powWithOpt :: Var -> Int -> Exp
+powWithOpt v n = powOpt v n $ pow v n
 
 main :: IO ()
-main = putStrLn $ formatExp $ powWithOpt (Name "a") 128
+main = putStrLn $ formatExp $ powWithOpt (Var "v") 128
