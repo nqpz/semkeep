@@ -17,9 +17,6 @@ formatExp = \case
   LetIn (Var s) e1 e2 -> "(let " ++ s ++ " = " ++ formatExp e1 ++ "\nin " ++ formatExp e2 ++ ")"
   Mul e1 e2 -> "(" ++ formatExp e1 ++ " * " ++ formatExp e2 ++ ")"
 
--- data ExpRel = Assoc
---   deriving (Show)
-
 assocMulDrawLeft :: Exp -> Exp
 assocMulDrawLeft (Mul e1 (Mul e2 e3)) = Mul (Mul e1 e2) e3
 assocMulDrawLeft _ = undefined
