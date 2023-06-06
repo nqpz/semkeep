@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Semkeep where
 
 newtype Var = Var String
@@ -43,6 +44,8 @@ subst pat repl = substExp
                        Mul e1 e2 -> Mul (substExp e1) (substExp e2)
                        _ -> e
 
-recurse :: (a -> a) -> a -> Int -> a
-recurse _next cur 0 = cur
-recurse next cur n_steps = recurse next (next cur) (n_steps - 1)
+recurse :: forall a. (a -> a) -> (Exp -> a) -> (a -> Exp) -> Exp -> Int -> Exp
+recurse next from_exp to_exp initial n = to_exp (recurse' (from_exp initial) n)
+  where recurse' :: a -> Int -> a
+        recurse' cur 0 = cur
+        recurse' cur i = recurse' (next cur) (i - 1)
