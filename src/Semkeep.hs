@@ -17,13 +17,13 @@ formatExp = \case
   LetIn (Var s) e1 e2 -> "(let " ++ s ++ " = " ++ formatExp e1 ++ "\nin " ++ formatExp e2 ++ ")"
   Mul e1 e2 -> "(" ++ formatExp e1 ++ " * " ++ formatExp e2 ++ ")"
 
-assocMulDrawLeft :: Exp -> Exp
-assocMulDrawLeft (Mul e1 (Mul e2 e3)) = Mul (Mul e1 e2) e3
-assocMulDrawLeft _ = undefined
+assocMulLeft :: Exp -> Exp
+assocMulLeft (Mul e1 (Mul e2 e3)) = Mul (Mul e1 e2) e3
+assocMulLeft _ = undefined
 
-assocMulDrawRight :: Exp -> Exp
-assocMulDrawRight (Mul (Mul e1 e2) e3) = Mul e1 (Mul e2 e3)
-assocMulDrawRight _ = undefined
+assocMulRight :: Exp -> Exp
+assocMulRight (Mul (Mul e1 e2) e3) = Mul e1 (Mul e2 e3)
+assocMulRight _ = undefined
 
 transformMulLeft :: (Exp -> Exp) -> Exp -> Exp
 transformMulLeft f e = case e of
