@@ -25,13 +25,13 @@ assocMulDrawRight :: Exp -> Exp
 assocMulDrawRight (Mul (Mul e1 e2) e3) = Mul e1 (Mul e2 e3)
 assocMulDrawRight _ = undefined
 
-recurseMulLeft :: (Exp -> Exp) -> Exp -> Exp
-recurseMulLeft f e = case e of
+transformMulLeft :: (Exp -> Exp) -> Exp -> Exp
+transformMulLeft f e = case e of
   Mul e1 e2 -> Mul (f e1) e2
   _ -> e
 
-recurseMulRight :: (Exp -> Exp) -> Exp -> Exp
-recurseMulRight f e = case e of
+transformMulRight :: (Exp -> Exp) -> Exp -> Exp
+transformMulRight f e = case e of
   Mul e1 e2 -> Mul e1 (f e2)
   _ -> e
 

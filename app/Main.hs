@@ -33,7 +33,7 @@ powOpt v n = makeSubsts . group
                   in (k', groupStep (k' - 2) e')
 
                 groupStep :: Int -> Exp -> Exp
-                groupStep = recurse (\f -> recurseMulRight f . assocMulDrawLeft) assocMulDrawLeft
+                groupStep = recurse (\f -> transformMulRight f . assocMulDrawLeft) assocMulDrawLeft
 
         makeSubsts :: Exp -> Exp
         makeSubsts e =
