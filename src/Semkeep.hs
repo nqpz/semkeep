@@ -45,3 +45,7 @@ subst pat repl = substExp
                        LetIn v e1 e2 -> LetIn v (substExp e1) (substExp e2)
                        Mul e1 e2 -> Mul (substExp e1) (substExp e2)
                        _ -> e
+
+recurse :: (a -> a) -> a -> Int -> a
+recurse _next cur 0 = cur
+recurse next cur n_steps = recurse next (next cur) (n_steps - 1)
