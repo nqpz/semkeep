@@ -9,16 +9,9 @@ intLog = (round :: Double -> Int) . logBase 2 . fromIntegral
 
 pow :: Var -> Int -> Exp
 pow v n =
-  assert (2^intLog n == n) $ -- FIXME
-  case n of
-  0 -> Const 1
-  _ -> let v' = Symbol v
-       in foldr Mul v' (replicate (n - 1) v')
-
--- pow' :: Var -> Int -> Exp
--- pow' v n =
---   assert (2^intLog n == n) $ -- FIXME
---   foldr Mul (Const 1) $ map Symbol $ replicate n v
+  assert (n > 0 && 2^intLog n == n) $ -- FIXME
+  let v' = Symbol v
+  in recurse (Mul v') v' (n - 1)
 
 powOpt :: Var -> Int -> Exp -> Exp
 powOpt v n = makeSubsts . group
