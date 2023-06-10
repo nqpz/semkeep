@@ -1,11 +1,12 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Semkeep where
+module Exp where
 
 newtype Var = Var String
   deriving (Eq, Show)
 
 data Exp = Symbol Var
+         | Arg1
          | Const Int
          | LetIn Var Exp Exp
          | Mul Exp Exp
@@ -14,6 +15,7 @@ data Exp = Symbol Var
 formatExp :: Exp -> String
 formatExp = \case
   Symbol (Var s) -> s
+  Arg1 -> "arg1"
   Const k -> show k
   LetIn (Var s) e1 e2 -> "(let " ++ s ++ " = " ++ formatExp e1 ++ "\nin " ++ formatExp e2 ++ ")"
   Mul e1 e2 -> "(" ++ formatExp e1 ++ " * " ++ formatExp e2 ++ ")"

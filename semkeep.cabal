@@ -24,7 +24,8 @@ source-repository head
 
 library
   exposed-modules:
-      Semkeep
+      Calc
+      Exp
   other-modules:
       Paths_semkeep
   autogen-modules:
