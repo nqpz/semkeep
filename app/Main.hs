@@ -55,61 +55,61 @@ powWithOpt :: E.Var -> Int -> E.Exp
 powWithOpt v n = powOpt v n $ pow v n
 
 
-type Next' a = C.Fun a a
+type Next' a constraint = C.Fun a a constraint
 
-argV :: C.Val E.Exp
+argV :: C.ConstructionOrOptimization constraint => C.Val E.Exp constraint
 argV = C.Lit E.ArgV
 
-pow' :: C.Val E.Exp
+pow' :: C.Val E.Exp C.ConstructionOnly
 pow' = C.Apply recurser argV
-  where recurser :: Next' E.Exp
+  where recurser :: Next' E.Exp C.ConstructionOnly
         recurser = C.Recurse next nMinusOne
 
-        next :: Next' E.Exp
+        next :: Next' E.Exp C.ConstructionOnly
         next = C.Body (C.Apply (C.BinOp C.ExpMul) (C.Tup C.Arg1 argV))
 
-        nMinusOne :: C.Val Int
+        nMinusOne :: C.Val Int C.GeneralUse
         nMinusOne = C.Apply (C.BinOp C.Sub) (C.Tup C.ArgN (C.Lit 1))
 
-powOpt' :: C.Fun E.Exp E.Exp
+powOpt' :: C.Fun E.Exp E.Exp C.GeneralUse
 powOpt' = C.Compose group (C.Subst (E.Mul E.ArgV E.ArgV) nLog)
-  where nLog :: C.Val Int
+  where nLog :: C.Val Int C.GeneralUse
         nLog = C.Apply (C.UnOp C.Log2) C.ArgN -- this is calculated twice, see nLogMinusOne, maybe fix this
 
-        groupStep :: C.Val Int -> C.Val (C.Fun E.Exp E.Exp)
+        groupStep :: C.Val Int C.GeneralUse -> C.Val (C.Fun E.Exp E.Exp C.GeneralUse) C.GeneralUse
         groupStep m = C.Apply recurser (C.Lit (C.AssocMul C.LeftOf))
-          where recurser :: Next' (C.Fun E.Exp E.Exp)
+          where recurser :: Next' (C.Fun E.Exp E.Exp C.GeneralUse) C.GeneralUse
                 recurser = C.Recurse next m
 
-                next :: Next' (C.Fun E.Exp E.Exp)
+                next :: Next' (C.Fun E.Exp E.Exp C.GeneralUse) C.GeneralUse
                 next = C.Body (C.Lit (C.Compose (C.AssocMul C.LeftOf) (C.TransformMul C.RightOf C.Arg1)))
 
-        group :: C.Fun E.Exp E.Exp
+        group :: C.Fun E.Exp E.Exp C.GeneralUse
         group = C.Body $ C.Snd $ C.Apply recurser $ C.Tup C.ArgN C.Arg1
-          where recurser :: Next' (Int, E.Exp)
+          where recurser :: Next' (Int, E.Exp) C.GeneralUse
                 recurser = C.Recurse next nLogMinusOne
 
-                next :: Next' (Int, E.Exp)
+                next :: Next' (Int, E.Exp) C.GeneralUse
                 next = C.Body
                        $ C.LetIn2 a1 a2
-                       $ C.Tup (C.Arg1 :: C.Val Int) (C.Apply' groupStep' (C.Arg2 :: C.Val E.Exp))
-                  where groupStep' :: C.Val (C.Fun E.Exp E.Exp)
+                       $ C.Tup (C.Arg1 :: C.Val Int C.GeneralUse) (C.Apply' groupStep' (C.Arg2 :: C.Val E.Exp C.GeneralUse))
+                  where groupStep' :: C.Val (C.Fun E.Exp E.Exp C.GeneralUse) C.GeneralUse
                         groupStep' = groupStep (C.Apply (C.BinOp C.Sub) (C.Tup C.Arg1 (C.Lit 2)))
 
-                        bodyArg :: C.Val (Int, E.Exp)
+                        bodyArg :: C.Val (Int, E.Exp) C.GeneralUse
                         bodyArg = C.Arg1
 
-                        a1 :: C.Val Int
+                        a1 :: C.Val Int C.GeneralUse
                         a1 = C.Apply (C.BinOp C.Div) (C.Tup (C.Fst bodyArg) (C.Lit 2))
 
-                        a2 :: C.Val E.Exp
+                        a2 :: C.Val E.Exp C.GeneralUse
                         a2 = C.Snd bodyArg
 
-                nLogMinusOne :: C.Val Int
+                nLogMinusOne :: C.Val Int C.GeneralUse
                 nLogMinusOne = C.Apply (C.BinOp C.Sub) (C.Tup nLog (C.Lit 1))
 
-powWithOpt' :: C.Val E.Exp
-powWithOpt' = C.Apply powOpt' pow'
+powWithOpt' :: C.Val E.Exp C.ConstructionOnly
+powWithOpt' = C.Apply (C.limit powOpt') pow'
 
 mainExp :: IO ()
 mainExp = putStrLn $ E.formatExp $ powWithOpt (E.Var "v") 128
