@@ -57,7 +57,6 @@ data Val a constraint where
   Tup :: (Show a, Show b) => Val a constraint -> Val b constraint -> Val (a, b) constraint
   Fst :: (Show a, Show b) => Val (a, b) constraint -> Val a constraint
   Snd :: (Show a, Show b) => Val (a, b) constraint -> Val b constraint
-  Var :: E.Var -> Val a GeneralUse
   Apply :: (Show a, Show b) => Fun a b constraint -> Val a constraint -> Val b constraint
   Apply' :: (Show a, Show b) => Val (Fun a b constraint) constraint -> Val a constraint -> Val b constraint
   ArgN :: ConstructionOrOptimization constraint => Val Int constraint
