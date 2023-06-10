@@ -74,7 +74,7 @@ pow' = C.Apply recurser argV
 powOpt' :: C.Fun E.Exp E.Exp
 powOpt' = C.Compose group (C.Subst (E.Mul E.ArgV E.ArgV) nLog)
   where nLog :: C.Val Int
-        nLog = C.Apply (C.UnOp C.Log2) C.ArgN
+        nLog = C.Apply (C.UnOp C.Log2) C.ArgN -- this is calculated twice, see nLogMinusOne, maybe fix this
 
         groupStep :: C.Val Int -> C.Val (C.Fun E.Exp E.Exp)
         groupStep m = C.Apply recurser (C.Lit (C.AssocMul C.LeftOf))
