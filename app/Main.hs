@@ -55,20 +55,26 @@ powWithOpt :: E.Var -> Int -> E.Exp
 powWithOpt v n = powOpt v n $ pow v n
 
 
-pow' :: E.Var -> E.Var -> C.Val E.Exp
-pow' v n =
-  let v' = E.Symbol v
-      next = C.Body (C.Apply (C.BinOp C.ExpMul) (C.Tup C.Arg1 (C.Lit v')))
-      n_minus_one = C.Apply (C.BinOp C.Sub) (C.Tup (C.Var n) (C.Lit 1))
-      fun = C.Recurse next n_minus_one
-  in C.Apply fun (C.Lit v')
-
 type Next' a = C.Fun a a
 
-powOpt' :: E.Var -> E.Var -> C.Fun E.Exp E.Exp
-powOpt' v n = C.Compose group (C.Subst (E.Mul E.Arg1 E.Arg1))
+argV :: C.Val E.Exp
+argV = C.Lit E.ArgV
+
+pow' :: C.Val E.Exp
+pow' = C.Apply recurser argV
+  where recurser :: Next' E.Exp
+        recurser = C.Recurse next nMinusOne
+
+        next :: Next' E.Exp
+        next = C.Body (C.Apply (C.BinOp C.ExpMul) (C.Tup C.Arg1 argV))
+
+        nMinusOne :: C.Val Int
+        nMinusOne = C.Apply (C.BinOp C.Sub) (C.Tup C.ArgN (C.Lit 1))
+
+powOpt' :: C.Fun E.Exp E.Exp
+powOpt' = C.Compose group (C.Subst (E.Mul E.ArgV E.ArgV) nLog)
   where nLog :: C.Val Int
-        nLog = C.Apply (C.UnOp C.Log2) (C.Var n)
+        nLog = C.Apply (C.UnOp C.Log2) C.ArgN
 
         groupStep :: C.Val Int -> C.Val (C.Fun E.Exp E.Exp)
         groupStep m = C.Apply recurser (C.Lit (C.AssocMul C.LeftOf))
@@ -79,7 +85,7 @@ powOpt' v n = C.Compose group (C.Subst (E.Mul E.Arg1 E.Arg1))
                 next = C.Body (C.Lit (C.Compose (C.AssocMul C.LeftOf) (C.TransformMul C.RightOf C.Arg1)))
 
         group :: C.Fun E.Exp E.Exp
-        group = C.Body $ C.Snd $ C.Apply recurser $ C.Tup (C.Var n) C.Arg1
+        group = C.Body $ C.Snd $ C.Apply recurser $ C.Tup C.ArgN C.Arg1
           where recurser :: Next' (Int, E.Exp)
                 recurser = C.Recurse next nLogMinusOne
 
@@ -102,14 +108,14 @@ powOpt' v n = C.Compose group (C.Subst (E.Mul E.Arg1 E.Arg1))
                 nLogMinusOne :: C.Val Int
                 nLogMinusOne = C.Apply (C.BinOp C.Sub) (C.Tup nLog (C.Lit 1))
 
-powWithOpt' :: E.Var -> E.Var -> C.Val E.Exp
-powWithOpt' v n = C.Apply (powOpt' v n) $ pow' v n
+powWithOpt' :: C.Val E.Exp
+powWithOpt' = C.Apply powOpt' pow'
 
 mainExp :: IO ()
 mainExp = putStrLn $ E.formatExp $ powWithOpt (E.Var "v") 128
 
 mainCalc :: IO ()
-mainCalc = putStrLn $ show $ powWithOpt' (E.Var "v") (E.Var "n")
+mainCalc = putStrLn $ show $ powWithOpt'
 
 main :: IO ()
 main = do

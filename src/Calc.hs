@@ -30,7 +30,7 @@ deriving instance Show a => Show (BinOp a)
 data Fun a b where
   AssocMul :: OpSide -> Fun E.Exp E.Exp
   TransformMul :: OpSide -> Val (Fun E.Exp E.Exp) -> Fun E.Exp E.Exp
-  Subst :: E.Exp -> Fun E.Exp E.Exp
+  Subst :: E.Exp -> Val Int -> Fun E.Exp E.Exp
   Recurse :: Fun a a -> Val Int -> Fun a a
   Compose :: (Show a, Show b) => Fun a b -> Fun b c -> Fun a c
   UnOp :: UnOp a b -> Fun a b
@@ -47,6 +47,7 @@ data Val a where
   Var :: E.Var -> Val a
   Apply :: (Show a, Show b) => Fun a b -> Val a -> Val b
   Apply' :: (Show a, Show b) => Val (Fun a b) -> Val a -> Val b
+  ArgN :: Val Int
   Arg1 :: Val a
   Arg2 :: Val a
   LetIn1 :: (Show u, Show b) => Val u -> Val b -> Val b
