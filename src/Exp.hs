@@ -1,6 +1,15 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Exp where
+module Exp ( Var(..)
+           , Exp(..)
+           , formatExp
+           , assocMulLeft
+           , assocMulRight
+           , transformMulLeft
+           , transformMulRight
+           , subst
+           , recurse
+           ) where
 
 newtype Var = Var String
   deriving (Eq, Show)
