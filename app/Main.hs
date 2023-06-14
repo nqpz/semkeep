@@ -55,20 +55,11 @@ powWithOpt :: E.Var -> Int -> E.Exp
 powWithOpt v n = powOpt v n $ pow v n
 
 
--- type Next' a constraint = C.Fun a a constraint
-
 pow' :: C.Val E.Exp C.ConstructionOnly C.WithArg1NotUsed C.WithArg2NotUsed
-pow' = undefined
--- pow' :: C.Val E.Exp C.ConstructionOnly C.WithArg1NotUsed C.WithArg2NotUsed
--- pow' = C.Apply recurser argV
---   where recurser :: Next' E.Exp C.ConstructionOnly (C.WithArg1Used E.Exp) C.WithArg2NotUsed
---         recurser = C.Recurse next nMinusOne
-
---         next :: Next' E.Exp C.ConstructionOnly (C.WithArg1Used E.Exp) C.WithArg2NotUsed
---         next = C.Body (C.Apply (C.BinOp C.ExpMul) (C.Tup C.Arg1 argV))
-
---         nMinusOne :: C.Val Int C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed
---         nMinusOne = C.Apply (C.BinOp C.Sub) (C.Tup C.ArgN (C.Lit 1))
+pow' = C.Apply recurser C.ArgV
+  where recurser = C.Recurse next nMinusOne
+        next = C.BinOp C.ExpMul C.Arg1 C.ArgV
+        nMinusOne = C.BinOp C.Sub C.ArgN (C.Lit 1)
 
 powOpt' :: C.Val E.Exp C.GeneralUse (C.WithArg1Used E.Exp) C.WithArg2NotUsed
 powOpt' = undefined

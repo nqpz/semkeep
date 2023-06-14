@@ -122,18 +122,21 @@ data Val a constraint arg1 arg2 where
   Recurse :: (ConstructionOrOptimization constraint,
               ConstructionOrOptimization intConstraint)
           => Val a constraint (WithArg1Used a) WithArg2NotUsed
-          -> Val Int intConstraint arg1 arg2
-          -> Val a constraint arg1 arg2
+          -> Val Int intConstraint WithArg1NotUsed arg2
+          -> Val a constraint (WithArg1Used a) arg2
 
   UnOp :: (Show a, Show b, ConstructionOrOptimization constraint)
        => UnOp a b
-       -> Val a constraint WithArg1NotUsed WithArg2NotUsed
-       -> Val b constraint WithArg1NotUsed WithArg2NotUsed
+       -> Val a constraint arg1 arg2
+       -> Val b constraint arg1 arg2
 
-  BinOp :: (Show a, ConstructionOrOptimization constraint)
+  BinOp :: (Show a, ConstructionOrOptimization constraint,
+            MergeUsedArg1 arg1A arg1B arg1Merged,
+            MergeUsedArg2 arg2A arg2B arg2Merged)
         => BinOp a constraint
-        -> Val (a, a) constraint WithArg1NotUsed WithArg2NotUsed
-        -> Val a constraint WithArg1NotUsed WithArg2NotUsed
+        -> Val a constraint arg1A arg2A
+        -> Val a constraint arg1B arg2B
+        -> Val a constraint arg1Merged arg2Merged
 
   Apply :: (Show a, Show b, ConstructionOrOptimization constraint)
         => Val b constraint (WithArg1Used a) WithArg2NotUsed
