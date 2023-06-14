@@ -64,7 +64,9 @@ data Val a constraint arg1 arg2 where
       => a
       -> Val a constraint WithArg1NotUsed WithArg2NotUsed
 
-  Tup :: (Show a, Show b, MergeUsedArg1 arg1A arg1B arg1Merged, MergeUsedArg2 arg2A arg2B arg2Merged)
+  Tup :: (Show a, Show b,
+          MergeUsedArg1 arg1A arg1B arg1Merged,
+          MergeUsedArg2 arg2A arg2B arg2Merged)
       => Val a constraint arg1A arg2A
       -> Val b constraint arg1B arg2B
       -> Val (a, b) constraint arg1Merged arg2Merged
@@ -91,7 +93,9 @@ data Val a constraint arg1 arg2 where
          -> Val a constraint (WithArg1Used u) WithArg2NotUsed
          -> Val a constraint arg1Root arg2Root
 
-  LetIn2 :: (Show u, Show v, Show a, MergeUsedArg1 arg1RootA arg1RootB arg1RootMerged, MergeUsedArg2 arg2RootA arg2RootB arg2RootMerged)
+  LetIn2 :: (Show u, Show v, Show a,
+             MergeUsedArg1 arg1RootA arg1RootB arg1RootMerged,
+             MergeUsedArg2 arg2RootA arg2RootB arg2RootMerged)
          => Val u constraint arg1RootA arg2RootA
          -> Val v constraint arg1RootB arg2RootB
          -> Val a constraint (WithArg1Used u) (WithArg2Used v)
@@ -105,13 +109,15 @@ data Val a constraint arg1 arg2 where
                -> Val E.Exp GeneralUse (WithArg1Used E.Exp) WithArg2NotUsed
                -> Val E.Exp GeneralUse WithArg1NotUsed WithArg2NotUsed
 
-  Subst :: (MergeUsedArg1 arg1A arg1B arg1Merged, MergeUsedArg2 arg2A arg2B arg2Merged)
+  Subst :: (MergeUsedArg1 arg1A arg1B arg1Merged,
+            MergeUsedArg2 arg2A arg2B arg2Merged)
         => E.Exp
         -> Val Int GeneralUse arg1A arg2A
         -> Val E.Exp GeneralUse arg1B arg2B
         -> Val E.Exp GeneralUse arg1Merged arg2Merged
 
-  Recurse :: (ConstructionOrOptimization constraint, ConstructionOrOptimization intConstraint)
+  Recurse :: (ConstructionOrOptimization constraint,
+              ConstructionOrOptimization intConstraint)
           => Val a constraint (WithArg1Used a) WithArg2NotUsed
           -> Val Int intConstraint arg1 arg2
           -> Val a constraint arg1 arg2
