@@ -132,6 +132,11 @@ data Val a constraint arg1 arg2 where
         -> Val (a, a) constraint WithArg1NotUsed WithArg2NotUsed
         -> Val a constraint WithArg1NotUsed WithArg2NotUsed
 
+  Apply :: (Show a, Show b, ConstructionOrOptimization constraint)
+        => Val b constraint (WithArg1Used a) WithArg2NotUsed
+        -> Val a constraint arg1 arg2
+        -> Val b constraint arg1 arg2
+
 deriving instance Show a => Show (Val a constraint arg1 arg2)
 
 limit :: Val a GeneralUse arg1 arg2 -> Val a ConstructionOnly arg1 arg2
