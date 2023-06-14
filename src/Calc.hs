@@ -59,35 +59,15 @@ instance MergeUsedArg2 WithArg2NotUsed WithArg2NotUsed WithArg2NotUsed
 instance MergeUsedArg2 WithArg2NotUsed (WithArg2Used a) (WithArg2Used a)
 instance MergeUsedArg2 (WithArg2Used a) WithArg2NotUsed (WithArg2Used a)
 
--- data Fun a b constraint arg1 arg2 where
---   AssocMul :: OpSide -> Fun E.Exp E.Exp GeneralUse WithArg1NotUsed WithArg2NotUsed
---   TransformMul :: OpSide -> Val (Fun E.Exp E.Exp constraint WithArg1NotUsed WithArg2NotUsed) constraint varg1 WithArg2NotUsed -> Fun E.Exp E.Exp constraint WithArg1NotUsed WithArg2NotUsed
---   Subst :: E.Exp -> Val Int constraint arg1 arg2 -> Fun E.Exp E.Exp constraint arg1 arg2
---   Recurse :: ConstructionOrOptimization intConstraint => Fun a a constraint farg1 WithArg2NotUsed -> Val Int intConstraint arg1 arg2 -> Fun a a constraint (WithArg1Used a) arg2
---   Compose :: (Show a, Show b) => Fun a b constraint WithArg1NotUsed WithArg2NotUsed -> Fun b c constraint WithArg1NotUsed WithArg2NotUsed -> Fun a c constraint WithArg1NotUsed WithArg2NotUsed
---   UnOp :: UnOp a b -> Fun a b GeneralUse (WithArg1Used a) WithArg2NotUsed
---   BinOp :: BinOp a constraint -> Fun (a, a) a constraint (WithArg1Used (a, a)) WithArg2NotUsed
---   Body :: Val b constraint arg1 arg2 -> Fun a b constraint arg1 arg2
-
--- deriving instance (Show a, Show b) => Show (Fun a b constraint arg1 arg2)
-
--- deriving instance (Show a, Show b) => Show (Fun a b constraint arg1 arg2)
-
 data Val a constraint arg1 arg2 where
   Lit :: ConstructionOrOptimization constraint
     => a -> Val a constraint WithArg1NotUsed WithArg2NotUsed
-  -- Fun :: Fun a b constraint arg1 arg2
-  --   -> Val (Fun a b constraint arg1 arg2) constraint arg1 arg2
   Tup :: (Show a, Show b, MergeUsedArg1 arg1A arg1B arg1Merged, MergeUsedArg2 arg2A arg2B arg2Merged)
     => Val a constraint arg1A arg2A -> Val b constraint arg1B arg2B -> Val (a, b) constraint arg1Merged arg2Merged
   Fst :: (Show a, Show b)
     => Val (a, b) constraint arg1 arg2 -> Val a constraint arg1 arg2
   Snd :: (Show a, Show b)
     => Val (a, b) constraint arg1 arg2 -> Val b constraint arg1 arg2
-  -- Apply :: (Show a, Show b)
-  --   => Fun a b constraint farg1 WithArg2NotUsed -> Val a constraint arg1 arg2 -> Val b constraint arg1 arg2
-  -- Apply' :: (Show a, Show b, MergeUsedArg1 arg1A arg1B arg1Merged, MergeUsedArg2 arg2A arg2B arg2Merged)
-  --   => Val (Fun a b constraint farg1 WithArg2NotUsed) constraint arg1A arg2A -> Val a constraint arg1B arg2B -> Val b constraint arg1Merged arg2Merged
   ArgN :: ConstructionOrOptimization constraint
     => Val Int constraint WithArg1NotUsed WithArg2NotUsed
   Arg1 :: ConstructionOrOptimization constraint
@@ -122,24 +102,8 @@ data Val a constraint arg1 arg2 where
         => BinOp a constraint
         -> Val (a, a) constraint WithArg1NotUsed WithArg2NotUsed
         -> Val a constraint WithArg1NotUsed WithArg2NotUsed
-  -- Compose :: (Show a, Show b) => Fun a b constraint WithArg1NotUsed WithArg2NotUsed -> Fun b c constraint WithArg1NotUsed WithArg2NotUsed -> Fun a c constraint WithArg1NotUsed WithArg2NotUsed
-  -- Body :: Val b constraint arg1 arg2 -> Fun a b constraint arg1 arg2
 
 deriving instance Show a => Show (Val a constraint arg1 arg2)
 
 limit :: Val a GeneralUse arg1 arg2 -> Val a ConstructionOnly arg1 arg2
 limit = unsafeCoerce -- fixme
-
-
--- limit :: Fun a b GeneralUse arg1 arg2 -> Fun a b ConstructionOnly arg1 arg2
--- limit = unsafeCoerce -- fixme
-
-
-
-
--- unLit :: Val a -> a
--- unLit (Lit a) = a
-
--- unValFun :: Val (Fun a b) -> Fun a b
--- unValFun (Lit fun) = fun
--- -- unValFun (Fst tup) =
