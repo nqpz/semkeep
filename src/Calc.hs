@@ -82,6 +82,9 @@ data Val a constraint arg1 arg2 where
   ArgN :: ConstructionOrOptimization constraint
        => Val Int constraint WithArg1NotUsed WithArg2NotUsed
 
+  ArgV :: ConstructionOrOptimization constraint
+       => Val E.Exp constraint WithArg1NotUsed WithArg2NotUsed
+
   Arg1 :: ConstructionOrOptimization constraint
        => Val a constraint (WithArg1Used a) WithArg2NotUsed
 

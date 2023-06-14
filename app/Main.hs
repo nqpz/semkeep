@@ -55,10 +55,6 @@ powWithOpt :: E.Var -> Int -> E.Exp
 powWithOpt v n = powOpt v n $ pow v n
 
 
-argV :: C.ConstructionOrOptimization constraint
-     => C.Val E.Exp constraint C.WithArg1NotUsed C.WithArg2NotUsed
-argV = C.Lit E.ArgV
-
 -- type Next' a constraint = C.Fun a a constraint
 
 pow' :: C.Val E.Exp C.ConstructionOnly C.WithArg1NotUsed C.WithArg2NotUsed
