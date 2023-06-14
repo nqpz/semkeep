@@ -55,60 +55,75 @@ powWithOpt :: E.Var -> Int -> E.Exp
 powWithOpt v n = powOpt v n $ pow v n
 
 
-type Next' a constraint = C.Fun a a constraint
-
-argV :: C.ConstructionOrOptimization constraint => C.Val E.Exp constraint
+argV :: C.ConstructionOrOptimization constraint
+     => C.Val E.Exp constraint C.WithArg1NotUsed C.WithArg2NotUsed
 argV = C.Lit E.ArgV
 
-pow' :: C.Val E.Exp C.ConstructionOnly
-pow' = C.Apply recurser argV
-  where recurser :: Next' E.Exp C.ConstructionOnly
-        recurser = C.Recurse next nMinusOne
+-- type Next' a constraint = C.Fun a a constraint
 
-        next :: Next' E.Exp C.ConstructionOnly
-        next = C.Body (C.Apply (C.BinOp C.ExpMul) (C.Tup C.Arg1 argV))
+pow' :: C.Val E.Exp C.ConstructionOnly C.WithArg1NotUsed C.WithArg2NotUsed
+pow' = undefined
+-- pow' :: C.Val E.Exp C.ConstructionOnly C.WithArg1NotUsed C.WithArg2NotUsed
+-- pow' = C.Apply recurser argV
+--   where recurser :: Next' E.Exp C.ConstructionOnly (C.WithArg1Used E.Exp) C.WithArg2NotUsed
+--         recurser = C.Recurse next nMinusOne
 
-        nMinusOne :: C.Val Int C.GeneralUse
-        nMinusOne = C.Apply (C.BinOp C.Sub) (C.Tup C.ArgN (C.Lit 1))
+--         next :: Next' E.Exp C.ConstructionOnly (C.WithArg1Used E.Exp) C.WithArg2NotUsed
+--         next = C.Body (C.Apply (C.BinOp C.ExpMul) (C.Tup C.Arg1 argV))
 
-powOpt' :: C.Fun E.Exp E.Exp C.GeneralUse
-powOpt' = C.Compose group (C.Subst (E.Mul E.ArgV E.ArgV) nLog)
-  where nLog :: C.Val Int C.GeneralUse
-        nLog = C.Apply (C.UnOp C.Log2) C.ArgN -- this is calculated twice, see nLogMinusOne, maybe fix this
+--         nMinusOne :: C.Val Int C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed
+--         nMinusOne = C.Apply (C.BinOp C.Sub) (C.Tup C.ArgN (C.Lit 1))
 
-        groupStep :: C.Val Int C.GeneralUse -> C.Val (C.Fun E.Exp E.Exp C.GeneralUse) C.GeneralUse
-        groupStep m = C.Apply recurser (C.Lit (C.AssocMul C.LeftOf))
-          where recurser :: Next' (C.Fun E.Exp E.Exp C.GeneralUse) C.GeneralUse
-                recurser = C.Recurse next m
+powOpt' :: C.Val E.Exp C.GeneralUse (C.WithArg1Used E.Exp) C.WithArg2NotUsed
+powOpt' = undefined
+-- powOpt' :: C.Fun E.Exp E.Exp C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed
+-- powOpt' = C.Compose group (C.Subst (E.Mul E.ArgV E.ArgV) nLog)
+--   where nLog :: C.Val Int C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed
+--         nLog = C.Apply (C.UnOp C.Log2) C.ArgN -- this is calculated twice, see nLogMinusOne, maybe fix this
 
-                next :: Next' (C.Fun E.Exp E.Exp C.GeneralUse) C.GeneralUse
-                next = C.Body (C.Lit (C.Compose (C.AssocMul C.LeftOf) (C.TransformMul C.RightOf C.Arg1)))
+--         -- groupStep :: C.Val Int C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed
+--         --           -> C.Val (C.Fun E.Exp E.Exp C.GeneralUse (C.WithArg1Used E.Exp) C.WithArg2NotUsed) C.GeneralUse (C.WithArg1Used E.Exp) C.WithArg2NotUsed
+--         groupStep m = C.Apply recurser (C.Fun (C.AssocMul C.LeftOf))
+--           -- where recurser :: Next' (C.Fun E.Exp E.Exp C.GeneralUse (C.WithArg1Used (C.Fun E.Exp E.Exp C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed)) C.WithArg2NotUsed) (C.WithArg1Used (C.Fun E.Exp E.Exp C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed)) C.WithArg1NotUsed C.WithArg2NotUsed
+--           where recurser = C.Recurse next m
 
-        group :: C.Fun E.Exp E.Exp C.GeneralUse
-        group = C.Body $ C.Snd $ C.Apply recurser $ C.Tup C.ArgN C.Arg1
-          where recurser :: Next' (Int, E.Exp) C.GeneralUse
-                recurser = C.Recurse next nLogMinusOne
+--                 next :: Next' (C.Fun E.Exp E.Exp C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed) C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed
+--                 next = C.Body $ C.Fun (C.Compose (C.AssocMul C.LeftOf) (C.TransformMul C.RightOf C.Arg1))
 
-                next :: Next' (Int, E.Exp) C.GeneralUse
-                next = C.Body
-                       $ C.LetIn2 a1 a2
-                       $ C.Tup (C.Arg1 :: C.Val Int C.GeneralUse) (C.Apply' groupStep' (C.Arg2 :: C.Val E.Exp C.GeneralUse))
-                  where groupStep' :: C.Val (C.Fun E.Exp E.Exp C.GeneralUse) C.GeneralUse
-                        groupStep' = groupStep (C.Apply (C.BinOp C.Sub) (C.Tup C.Arg1 (C.Lit 2)))
+--                 -- next' :: C.Val (C.Fun E.Exp E.Exp C.GeneralUse (C.WithArg1Used (C.Fun E.Exp E.Exp C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed)) C.WithArg2NotUsed) C.GeneralUse (C.WithArg1Used (C.Fun E.Exp E.Exp C.GeneralUse)) C.WithArg2NotUsed
+-- --                next' = C.Fun (C.Compose (C.AssocMul C.LeftOf) (C.TransformMul C.RightOf C.Arg1))
 
-                        bodyArg :: C.Val (Int, E.Exp) C.GeneralUse
-                        bodyArg = C.Arg1
+--                 -- next'' :: u
+--                 -- next'' = C.TransformMul C.RightOf C.Arg1
 
-                        a1 :: C.Val Int C.GeneralUse
-                        a1 = C.Apply (C.BinOp C.Div) (C.Tup (C.Fst bodyArg) (C.Lit 2))
+--                 -- next''' :: C.Val (C.Fun E.Exp E.Exp)
+--                 -- next''' = C.Arg1
 
-                        a2 :: C.Val E.Exp C.GeneralUse
-                        a2 = C.Snd bodyArg
+--         group :: C.Fun E.Exp E.Exp C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed
+--         group = C.Body $ C.Snd $ C.Apply recurser $ C.Tup C.ArgN C.Arg1
+--           where recurser :: Next' (Int, E.Exp) C.GeneralUse (C.WithArg1Used (Int, E.Exp)) C.WithArg2NotUsed
+--                 recurser = C.Recurse next nLogMinusOne
 
-                nLogMinusOne :: C.Val Int C.GeneralUse
-                nLogMinusOne = C.Apply (C.BinOp C.Sub) (C.Tup nLog (C.Lit 1))
+--                 next :: Next' (Int, E.Exp) C.GeneralUse (C.WithArg1Used (Int, E.Exp)) C.WithArg2NotUsed
+--                 next = C.Body
+--                        $ C.LetIn2 a1 a2
+--                        $ C.Tup (C.Arg1 :: C.Val Int C.GeneralUse (C.WithArg1Used Int) C.WithArg2NotUsed) (C.Apply' groupStep' (C.Arg2 :: C.Val E.Exp C.GeneralUse C.WithArg1NotUsed (C.WithArg2Used E.Exp)))
+--                   where groupStep' :: C.Val (C.Fun E.Exp E.Exp C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed) C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed
+--                         groupStep' = groupStep (C.Apply (C.BinOp C.Sub) (C.Tup C.Arg1 (C.Lit 2)))
 
-powWithOpt' :: C.Val E.Exp C.ConstructionOnly
+--                         bodyArg :: C.Val (Int, E.Exp) C.GeneralUse (C.WithArg1Used (Int, E.Exp)) C.WithArg2NotUsed
+--                         bodyArg = C.Arg1
+
+--                         a1 :: C.Val Int C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed
+--                         a1 = C.Apply (C.BinOp C.Div) (C.Tup (C.Fst bodyArg) (C.Lit 2))
+
+--                         a2 :: C.Val E.Exp C.GeneralUse (C.WithArg1Used (Int, E.Exp)) C.WithArg2NotUsed
+--                         a2 = C.Snd bodyArg
+
+--                 nLogMinusOne :: C.Val Int C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed
+--                 nLogMinusOne = C.Apply (C.BinOp C.Sub) (C.Tup nLog (C.Lit 1))
+
+powWithOpt' :: C.Val E.Exp C.ConstructionOnly C.WithArg1NotUsed C.WithArg2NotUsed
 powWithOpt' = C.Apply (C.limit powOpt') pow'
 
 mainExp :: IO ()
@@ -121,4 +136,4 @@ main :: IO ()
 main = do
   mainExp
   putStrLn "----------"
-  mainCalc
+  -- mainCalc
