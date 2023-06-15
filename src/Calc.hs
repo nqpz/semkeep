@@ -255,7 +255,7 @@ formatVal = intercalate "\n" . formatVal'
           LetIn2 x y res -> arg "LetIn2" (formatVal' x ++ formatVal' y ++ formatVal' res)
           AssocMul opSide x -> arg "AssocMul" (show opSide : formatVal' x)
           TransformMul opSide x -> arg "TransformMul" (show opSide : formatVal' x)
-          Subst e x y -> arg "Subst" (E.formatExp e : formatVal' x ++ formatVal' y)
+          Subst e x y -> arg "Subst" (("EXP[" ++ E.formatExp e ++ "]") : formatVal' x ++ formatVal' y)
           Recurse x y -> arg "Recurse" (formatVal' x ++ formatVal' y)
           UnOp op x -> arg "UnOp" (show op : formatVal' x)
           BinOp op x y -> arg "UnOp" (show op : formatVal' x ++ formatVal' y)
