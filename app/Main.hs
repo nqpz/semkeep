@@ -67,9 +67,8 @@ powOpt' :: C.Val E.Exp C.GeneralUse (C.WithArg1Used E.Exp) C.WithArg2NotUsed
 powOpt' = C.LetIn1 group $ C.Subst (E.Mul E.ArgV E.ArgV) nLog C.Arg1
   where nLog = C.UnOp C.Log2 C.ArgN -- FIXME: Don't calculate this twice (see nLogMinusOne)
 
---        groupStep :: (C.Arg1 arg1, C.Arg2 arg2)
-        groupStep :: C.Val Int C.GeneralUse (C.WithArg1Used Int) C.WithArg2NotUsed -- arg1 arg2
-                  -> C.Val (C.Fun E.Exp E.Exp) C.GeneralUse (C.WithArg1Used Int) C.WithArg2NotUsed -- arg1 arg2
+        groupStep :: C.Val Int C.GeneralUse (C.WithArg1Used Int) C.WithArg2NotUsed
+                  -> C.Val (C.Fun E.Exp E.Exp) C.GeneralUse (C.WithArg1Used Int) C.WithArg2NotUsed
         groupStep m = C.ApplyCalculated (C.Recurse (C.calculated next) m) (C.LitFun $ C.Fun $ C.AssocMul C.LeftOf C.Arg1)
           where next :: C.Val (C.Fun E.Exp E.Exp) C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed
                 next = C.Compose (C.LitFun (C.Fun (C.AssocMul C.LeftOf C.Arg1))) (C.LitFun (C.Fun (C.TransformMul C.RightOf C.Arg1)))
