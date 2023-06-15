@@ -1,15 +1,12 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE StandaloneDeriving #-}
--- {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE FunctionalDependencies #-}
 module Calc ( GeneralUse
             , ConstructionOnly
             , ConstructionOrOptimization
             , Arg1
             , Arg2
-            -- , MergeUsedArg1
-            -- , MergeUsedArg2
             , WithArg1Used
             , WithArg1NotUsed
             , WithArg2Used
@@ -78,12 +75,6 @@ instance MergeUsedArg2 WithArg2NotUsed WithArg2NotUsed WithArg2NotUsed
 instance MergeUsedArg2 WithArg2NotUsed (WithArg2Used a) (WithArg2Used a)
 instance MergeUsedArg2 (WithArg2Used a) WithArg2NotUsed (WithArg2Used a)
 instance MergeUsedArg2 (WithArg2Used a) (WithArg2Used a) (WithArg2Used a)
-
--- type family Merging1 a b where
---   Merging1 WithArg1NotUsed WithArg1NotUsed = WithArg1NotUsed
---   Merging1 WithArg1NotUsed (WithArg1Used a) = WithArg1Used a
---   Merging1 (WithArg1Used a) WithArg1NotUsed = WithArg1Used a
---   Merging1 (WithArg1Used a) (WithArg1Used a) = WithArg1Used a
 
 data Fun a b = Fun (Val b GeneralUse (WithArg1Used a) WithArg2NotUsed)
   deriving (Show)
@@ -224,11 +215,6 @@ data Val a constraint arg1 arg2 where
     -> Val a constraint arg1B arg2B
     -> Val b constraint arg1Merged arg2Merged
 
-  -- FunVal ::
-  --   ConstructionOrOptimization constraint
-  --   => Fun a b
-  --   -> Val (Fun a b) constraint WithArg1NotUsed WithArg2NotUsed
-
   Compose ::
     (Show a, Show b, Show c, ConstructionOrOptimization constraint,
      Arg1 arg1A, Arg1 arg1B, Arg1 arg1Merged,
@@ -243,10 +229,10 @@ deriving instance Show a => Show (Val a constraint arg1 arg2)
 
 calculated :: Val a constraint WithArg1NotUsed WithArg2NotUsed
            -> Val a constraint (WithArg1Used a) WithArg2NotUsed
-calculated = unsafeCoerce -- fixme
+calculated = unsafeCoerce -- FIXME
 
 limit :: Val a GeneralUse arg1 arg2 -> Val a ConstructionOnly arg1 arg2
-limit = unsafeCoerce -- fixme
+limit = unsafeCoerce -- FIXME
 
 formatVal :: Show a => Val a constraint arg1 arg2 -> String
 formatVal = intercalate "\n" . formatVal'
