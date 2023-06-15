@@ -15,6 +15,7 @@ newtype Var = Var String
   deriving (Eq, Show)
 
 data Exp = Symbol Var
+         | ArgV
          | Const Int
          | LetIn Var Exp Exp
          | Mul Exp Exp
@@ -23,6 +24,7 @@ data Exp = Symbol Var
 formatExp :: Exp -> String
 formatExp = \case
   Symbol (Var s) -> s
+  ArgV -> "argV"
   Const k -> show k
   LetIn (Var s) e1 e2 -> "(let " ++ s ++ " = " ++ formatExp e1 ++ "\nin " ++ formatExp e2 ++ ")"
   Mul e1 e2 -> "(" ++ formatExp e1 ++ " * " ++ formatExp e2 ++ ")"
