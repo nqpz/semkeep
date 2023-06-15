@@ -70,9 +70,9 @@ powOpt' = C.LetIn1 group $ C.Subst (E.Mul E.ArgV E.ArgV) nLog C.Arg1
 --        groupStep :: (C.Arg1 arg1, C.Arg2 arg2)
         groupStep :: C.Val Int C.GeneralUse (C.WithArg1Used Int) C.WithArg2NotUsed -- arg1 arg2
                   -> C.Val (C.Fun E.Exp E.Exp) C.GeneralUse (C.WithArg1Used Int) C.WithArg2NotUsed -- arg1 arg2
-        groupStep m = C.ApplyCalculated (C.Recurse (C.calculated next) m) (C.Lit $ C.Fun $ C.AssocMul C.LeftOf C.Arg1)
+        groupStep m = C.ApplyCalculated (C.Recurse (C.calculated next) m) (C.LitFun $ C.Fun $ C.AssocMul C.LeftOf C.Arg1)
           where next :: C.Val (C.Fun E.Exp E.Exp) C.GeneralUse C.WithArg1NotUsed C.WithArg2NotUsed
-                next = C.Compose (C.Lit (C.Fun (C.AssocMul C.LeftOf C.Arg1))) (C.Lit (C.Fun (C.TransformMul C.RightOf C.Arg1)))
+                next = C.Compose (C.LitFun (C.Fun (C.AssocMul C.LeftOf C.Arg1))) (C.LitFun (C.Fun (C.TransformMul C.RightOf C.Arg1)))
 
         group :: C.Val E.Exp C.GeneralUse (C.WithArg1Used E.Exp) C.WithArg2NotUsed
         group = C.Snd $ C.ApplyCalculated (C.Recurse next nLogMinusOne) calcFunArg
@@ -110,7 +110,7 @@ mainExp :: IO ()
 mainExp = putStrLn $ E.formatExp $ powWithOpt (E.Var "v") 128
 
 mainCalc :: IO ()
-mainCalc = putStrLn $ show $ powWithOpt'
+mainCalc = putStrLn $ C.formatVal $ powWithOpt'
 
 main :: IO ()
 main = do

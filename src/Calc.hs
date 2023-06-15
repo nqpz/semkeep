@@ -15,10 +15,12 @@ module Calc ( GeneralUse
             , BinOp(..)
             , Fun(..)
             , Val(..)
+            , formatVal
             , limit
             , calculated
             ) where
 
+import Data.List (intercalate)
 import Unsafe.Coerce
 import qualified Exp as E
 
@@ -78,9 +80,14 @@ data Fun a b = Fun (Val b GeneralUse (WithArg1Used a) WithArg2NotUsed)
 
 data Val a constraint arg1 arg2 where
   Lit ::
-    ConstructionOrOptimization constraint
+    (Show a, ConstructionOrOptimization constraint)
     => a
     -> Val a constraint WithArg1NotUsed WithArg2NotUsed
+
+  LitFun ::
+    (Show a, Show b, ConstructionOrOptimization constraint)
+    => Fun a b
+    -> Val (Fun a b) constraint WithArg1NotUsed WithArg2NotUsed
 
   Tup ::
     (Show a, Show b,
@@ -230,3 +237,31 @@ calculated = unsafeCoerce -- fixme
 
 limit :: Val a GeneralUse arg1 arg2 -> Val a ConstructionOnly arg1 arg2
 limit = unsafeCoerce -- fixme
+
+formatVal :: Show a => Val a constraint arg1 arg2 -> String
+formatVal = intercalate "\n" . formatVal'
+  where formatVal' :: Show a => Val a constraint arg1 arg2 -> [String]
+        formatVal' = \case
+          Lit x -> arg "Lit" [show x]
+          LitFun (Fun v) -> arg "LitFun" (formatVal' v)
+          Tup x y -> arg "Tup" (formatVal' x ++ formatVal' y)
+          Fst x -> arg "Fst" (formatVal' x)
+          Snd x -> arg "Snd" (formatVal' x)
+          ArgN -> ["ArgN"]
+          ArgV -> ["ArgV"]
+          Arg1 -> ["Arg1"]
+          Arg2 -> ["Arg2"]
+          LetIn1 x res -> arg "LetIn1" (formatVal' x ++ formatVal' res)
+          LetIn2 x y res -> arg "LetIn2" (formatVal' x ++ formatVal' y ++ formatVal' res)
+          AssocMul opSide x -> arg "AssocMul" (show opSide : formatVal' x)
+          TransformMul opSide x -> arg "TransformMul" (show opSide : formatVal' x)
+          Subst e x y -> arg "Subst" (E.formatExp e : formatVal' x ++ formatVal' y)
+          Recurse x y -> arg "Recurse" (formatVal' x ++ formatVal' y)
+          UnOp op x -> arg "UnOp" (show op : formatVal' x)
+          BinOp op x y -> arg "UnOp" (show op : formatVal' x ++ formatVal' y)
+          Apply f x -> arg "Apply" (formatVal' f ++ formatVal' x)
+          ApplyCalculated f x -> arg "ApplyCalculated" (formatVal' f ++ formatVal' x)
+          ApplyFun f x -> arg "ApplyFun" (formatVal' f ++ formatVal' x)
+          Compose x y -> arg "Compose" (formatVal' x ++ formatVal' y)
+          where arg :: String -> [String] -> [String]
+                arg s ts = (s ++ "(") : map (" " ++) ts ++ [")"]
