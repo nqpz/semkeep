@@ -1,11 +1,15 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE StandaloneDeriving #-}
+-- {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE FunctionalDependencies #-}
 module Calc ( GeneralUse
             , ConstructionOnly
             , ConstructionOrOptimization
             , Arg1
             , Arg2
+            -- , MergeUsedArg1
+            -- , MergeUsedArg2
             , WithArg1Used
             , WithArg1NotUsed
             , WithArg2Used
@@ -62,8 +66,8 @@ class Arg2 a
 instance Arg2 (WithArg2Used a)
 instance Arg2 WithArg2NotUsed
 
-class MergeUsedArg1 a b m
-class MergeUsedArg2 a b m
+class MergeUsedArg1 a b m | a b -> m
+class MergeUsedArg2 a b m | a b -> m
 
 instance MergeUsedArg1 WithArg1NotUsed WithArg1NotUsed WithArg1NotUsed
 instance MergeUsedArg1 WithArg1NotUsed (WithArg1Used a) (WithArg1Used a)
@@ -74,6 +78,12 @@ instance MergeUsedArg2 WithArg2NotUsed WithArg2NotUsed WithArg2NotUsed
 instance MergeUsedArg2 WithArg2NotUsed (WithArg2Used a) (WithArg2Used a)
 instance MergeUsedArg2 (WithArg2Used a) WithArg2NotUsed (WithArg2Used a)
 instance MergeUsedArg2 (WithArg2Used a) (WithArg2Used a) (WithArg2Used a)
+
+-- type family Merging1 a b where
+--   Merging1 WithArg1NotUsed WithArg1NotUsed = WithArg1NotUsed
+--   Merging1 WithArg1NotUsed (WithArg1Used a) = WithArg1Used a
+--   Merging1 (WithArg1Used a) WithArg1NotUsed = WithArg1Used a
+--   Merging1 (WithArg1Used a) (WithArg1Used a) = WithArg1Used a
 
 data Fun a b = Fun (Val b GeneralUse (WithArg1Used a) WithArg2NotUsed)
   deriving (Show)
